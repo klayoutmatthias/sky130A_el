@@ -37,6 +37,7 @@ reload(sky130_primlib.justify)
 reload(sky130_primlib.node)
 reload(sky130_primlib.pack_bbox)
 reload(sky130_primlib.rect)
+reload(sky130_primlib.contact)
 reload(sky130_primlib.contact_pcell)
 import sky130_primlib
 

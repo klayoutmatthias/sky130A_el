@@ -11,6 +11,10 @@ from .delegate import *
 from .pack_bbox import *
 from .rect import *
 
+from .contact import make_contact
 from .contact_pcell import *
 
-__all__ = [ "Rules", "Layers", "Node", "Array", "Delegate", "Justify", "PackBBox", "Rect", "ContactPCell" ]
+__all__ = [ "Rules", "Layers", "Node", "Array", 
+            "Delegate", "Justify", "PackBBox", "Rect", 
+            "make_contact",
+            "ContactPCell" ]
