@@ -20,3 +20,4 @@ class Layers:
   via4    = kdb.LayerInfo(71, 44)
   met5    = kdb.LayerInfo(72, 20)
 
+  pr_bnd  = kdb.LayerInfo(235, 4)

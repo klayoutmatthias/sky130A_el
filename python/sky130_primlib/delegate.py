@@ -2,7 +2,9 @@
 import pya as kdb
 import typing
 
-class Delegate:
+from .node import Node
+
+class Delegate(Node):
 
   """
   A generic delegate
@@ -22,9 +24,6 @@ class Delegate:
 
   def feature_box(self) -> kdb.DBox:
     return self.child.feature_box()
-
-  def ref_point(self, name) -> kdb.DBox:
-    return self.child.ref_point(name)
 
   def produce(self, cell: kdb.Cell, trans: kdb.DTrans):
     return self.child.produce(cell, trans)

@@ -16,8 +16,6 @@
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
  <text>
-from importlib import reload  
-
 # install the path to the PCell lib unless it is there already
 import sys
 import os
@@ -28,18 +26,22 @@ if not lib_path in sys.path:
 import sky130_primlib
 
 # simplifies debugging
+from importlib import reload  
 reload(sky130_primlib)
-reload(sky130_primlib.rules)
-reload(sky130_primlib.layers)
 reload(sky130_primlib.array)
-reload(sky130_primlib.delegate)
-reload(sky130_primlib.justify)
-reload(sky130_primlib.node)
-reload(sky130_primlib.pack_bbox)
-reload(sky130_primlib.rect)
 reload(sky130_primlib.contact)
 reload(sky130_primlib.contact_pcell)
-import sky130_primlib
+reload(sky130_primlib.delegate)
+reload(sky130_primlib.justify)
+reload(sky130_primlib.layers)
+reload(sky130_primlib.linear)
+reload(sky130_primlib.mosfet)
+reload(sky130_primlib.mosfet_pcell)
+reload(sky130_primlib.node)
+reload(sky130_primlib.pack)
+reload(sky130_primlib.rect)
+reload(sky130_primlib.rules)
+
 
 class Sky130PrimLib(pya.Library):
 

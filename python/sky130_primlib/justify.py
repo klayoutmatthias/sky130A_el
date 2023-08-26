@@ -9,7 +9,7 @@ class Justify(Node):
   def __init__(self, ref_point: str = "C", child: Node = None):
 
     """
-    Justifies the node at the given reference point (the pack box counts)
+    Aligns the node at the given reference point (the pack box counts)
     """
     self.rp = ref_point
     self.child = child
@@ -28,7 +28,7 @@ class Justify(Node):
     return self._trans() * self.child.feature_box()
 
   def ref_point(self, name):
-    self._trans() * self.child.ref_point(name)
+    return self._trans() * self.child.ref_point(name)
 
   def produce(self, cell: kdb.Cell, trans: kdb.DTrans):
     self.child.produce(cell, trans * self._trans())

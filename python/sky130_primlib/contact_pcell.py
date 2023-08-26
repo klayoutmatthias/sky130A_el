@@ -9,26 +9,27 @@ class ContactPCell(kdb.PCellDeclarationHelper):
 
     super().__init__()
 
-    choices = []
-    for i in range(0, len(bot_layers)):
-      choices.append(( bot_layers[i], i ))
+    choices = [ (s, s) for s in bot_layers ]
 
-    self.param("bot_index", self.TypeInt, "Bottom Layer", choices = choices, default = 0)
+    self.param("_version", self.TypeInt, "Version", hidden = True, default = 0)
+    self.param("bot", self.TypeString, "Bottom Layer", choices = choices, default = bot_layers[0])
     self.param("nx", self.TypeInt, "Columns (or width, whichever is larger)", default = 1)
     self.param("ny", self.TypeInt, "Rows (or height, whichever is larger)", default = 1)
     self.param("w",  self.TypeDouble, "Width (or columns, whichever is larger)", default = 0)
     self.param("h",  self.TypeDouble, "Height (or rows, whichever is larger)", default = 0)
 
+  def _bot_index(self):
+    return bot_layers.index(self.bot)
+    
   def coerce_param_impl(self):
     self.nx = max(1, self.nx)
     self.ny = max(1, self.ny)
 
   def display_text_impl(self):
-    bn = bot_layers[self.bot_index]
-    return "Contact %s %d,%d (nx,ny) %.12g,%.12g (w,h)" % (bn, self.nx, self.ny, self.w, self.h)
+    return "Contact %s %d,%d (nx,ny) %.12g,%.12g (w,h)" % (self.bot, self.nx, self.ny, self.w, self.h)
 
   def produce_impl(self):
-    gen = make_contact(bot_index = self.bot_index, nx = self.nx, ny = self.ny, w = self.w, h = self.h)
+    gen = make_contact(bot_index = self._bot_index(), nx = self.nx, ny = self.ny, w = self.w, h = self.h)
     gen.produce(self.cell, kdb.DTrans())
     
 

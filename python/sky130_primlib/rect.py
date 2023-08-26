@@ -7,29 +7,39 @@ from .node import Node
 class Rect(Node):
 
   def __init__(self, layer: kdb.LayerInfo = None, 
-                     enclose: Node = None, 
+                     enclose: Node = None,
+                     enclose_pack: bool = False,
                      w: float = 1.0, h: float = 1.0, 
-                     halo: float = 0.0, halo_x: float = 0.0, halo_y: float = 0.0,
-                     enl: float = 0.0, enl_x: float = 0.0, enl_y: float = 0.0):
+                     halo: float = 0.0, halo_x: float = 0.0, halo_y: float = 0.0, 
+                     halo_l: float = 0.0, halo_b: float = 0.0, halo_t: float = 0.0, halo_r: float = 0.0, 
+                     enl: float = 0.0, enl_x: float = 0.0, enl_y: float = 0.0,
+                     enl_l: float = 0.0, enl_b: float = 0.0, enl_t: float = 0.0, enl_r: float = 0.0):
 
     self.enclose = enclose
 
-    self.halo_x = halo + halo_x
-    self.halo_y = halo + halo_y
-    self.enl_x = enl + enl_x
-    self.enl_y = enl + enl_y
+    self.halo_l = halo + halo_x + halo_l
+    self.halo_r = halo + halo_x + halo_r
+    self.halo_b = halo + halo_y + halo_b
+    self.halo_t = halo + halo_y + halo_t
+    self.enl_l = enl + enl_x + enl_l
+    self.enl_r = enl + enl_x + enl_r
+    self.enl_b = enl + enl_y + enl_b
+    self.enl_t = enl + enl_y + enl_t
     self.layer = layer
 
     if enclose is not None:
-      fb = enclose.feature_box()
-      self.w = max(w - 2 * self.enl_x, fb.width())
-      self.h = max(h - 2 * self.enl_y, fb.height())
+      if enclose_pack:
+        fb = enclose.pack_box()
+      else:
+        fb = enclose.feature_box()
+      self.w = max(w - self.enl_l - self.enl_r, fb.width())
+      self.h = max(h - self.enl_b - self.enl_t, fb.height())
       self.etrans = kdb.DTrans(fb.center() - kdb.DPoint(self.w * 0.5, self.h * 0.5))
     else:
       self.w = w
       self.h = h
       self.etrans = kdb.DTrans()
-
+      
   def bounding_box(self) -> kdb.DBox:
     if self.enclose:
       return self.enclose.bounding_box()
@@ -44,13 +54,12 @@ class Rect(Node):
 
   def pack_box(self) -> kdb.DBox:
     if self.enclose:
-      return self.enclose.pack_box().enlarged(self.halo_x, self.halo_y)
+      pb = self.enclose.pack_box()
+      return kdb.DBox(pb.left - self.halo_l, pb.bottom - self.halo_b, 
+                      pb.right + self.halo_r, pb.top + self.halo_t)
     else:
-      return kdb.DBox(-self.halo_x, -self.halo_y, self.w + self.halo_x, self.h + self.halo_y)
+      return kdb.DBox(-self.halo_l, -self.halo_b, self.w + self.halo_r, self.h + self.halo_t)
 
   def produce(self, cell: kdb.Cell, trans: kdb.DTrans):
     lindex = cell.layout().layer(self.layer)
-    cell.shapes(lindex).insert(trans * self.etrans * kdb.DBox(0, 0, self.w, self.h).enlarged(self.enl_x, self.enl_y))
-    if self.enclose:
-      self.enclose.produce(cell, trans)
-
+    cell.shapes(lindex).insert(trans * self.etrans * kdb.DBox(-self.enl_l, -self.enl_b, self.w + self.enl_r, self.h + self.enl_t))
