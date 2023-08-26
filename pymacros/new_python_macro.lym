@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>
+from importlib import reload  
+
+# install the path to the PCell lib unless it is there already
+import sys
+import os
+lib_path = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "python"))
+if not lib_path in sys.path:
+  sys.path.insert(0, lib_path)
+
+import sky130_primlib
+
+# simplifies debugging
+reload(sky130_primlib)
+reload(sky130_primlib.rules)
+reload(sky130_primlib.layers)
+reload(sky130_primlib.array)
+reload(sky130_primlib.delegate)
+reload(sky130_primlib.justify)
+reload(sky130_primlib.node)
+reload(sky130_primlib.pack_bbox)
+reload(sky130_primlib.rect)
+reload(sky130_primlib.contact_pcell)
+import sky130_primlib
+
+class Sky130PrimLib(pya.Library):
+
+  def __init__(self):
+  
+    self.description = "Skywater 130nm Primitives Library"
+
+    # auto-register the PCells 
+    for c in sky130_primlib.__all__:
+      if "PCell" in c:
+        tag = c.index("PCell")
+        if tag &gt; 0:
+          name = c[0 : tag]
+          cls = sky130_primlib.__dict__[c]
+          self.layout().register_pcell(name, cls())
+
+    self.register(type(self).__name__)
+    
+# instantiate and register the library
+Sky130PrimLib()
+</text>
+</klayout-macro>
