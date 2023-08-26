@@ -6,16 +6,19 @@ from .node import Node
 
 class Rect(Node):
 
-  def __init__(self, layer: kdb.LayerInfo = None, 
-                     enclose: Node = None,
-                     enclose_pack: bool = False,
-                     w: float = 1.0, h: float = 1.0, 
-                     halo: float = 0.0, halo_x: float = 0.0, halo_y: float = 0.0, 
-                     halo_l: float = 0.0, halo_b: float = 0.0, halo_t: float = 0.0, halo_r: float = 0.0, 
-                     enl: float = 0.0, enl_x: float = 0.0, enl_y: float = 0.0,
-                     enl_l: float = 0.0, enl_b: float = 0.0, enl_t: float = 0.0, enl_r: float = 0.0):
+  def __init__(self, layer: kdb.LayerInfo=None, 
+                     enclose: Node=None,
+                     enclose_pack: bool=False,
+                     enclose_feature: str="*",
+                     name: str="",
+                     w: float=0.0, h: float=0.0, 
+                     halo: float=0.0, halo_x: float=0.0, halo_y: float=0.0, 
+                     halo_l: float=0.0, halo_b: float=0.0, halo_t: float=0.0, halo_r: float=0.0, 
+                     enl: float=0.0, enl_x: float=0.0, enl_y: float=0.0,
+                     enl_l: float=0.0, enl_b: float=0.0, enl_t: float=0.0, enl_r: float=0.0):
 
     self.enclose = enclose
+    self.name = name
 
     self.halo_l = halo + halo_x + halo_l
     self.halo_r = halo + halo_x + halo_r
@@ -31,7 +34,7 @@ class Rect(Node):
       if enclose_pack:
         fb = enclose.pack_box()
       else:
-        fb = enclose.feature_box()
+        fb = enclose.feature_box(enclose_feature)
       self.w = max(w - self.enl_l - self.enl_r, fb.width())
       self.h = max(h - self.enl_b - self.enl_t, fb.height())
       self.etrans = kdb.DTrans(fb.center() - kdb.DPoint(self.w * 0.5, self.h * 0.5))
@@ -41,16 +44,13 @@ class Rect(Node):
       self.etrans = kdb.DTrans()
       
   def bounding_box(self) -> kdb.DBox:
-    if self.enclose:
-      return self.enclose.bounding_box()
-    else:
-      return kdb.DBox(0, 0, self.w, self.h)
+    return kdb.DBox(-self.enl_l, -self.enl_b, self.w + self.enl_r, self.h + self.enl_t)
 
-  def feature_box(self) -> kdb.DBox:
-    if self.enclose:
-      return self.enclose.feature_box()
+  def feature_box(self, feature_name: str) -> kdb.DBox:
+    if feature_name == "*" or feature_name == self.name:
+      return self.bounding_box()
     else:
-      return kdb.DBox(0, 0, self.w, self.h)
+      return kdb.DBox()
 
   def pack_box(self) -> kdb.DBox:
     if self.enclose:
@@ -61,5 +61,6 @@ class Rect(Node):
       return kdb.DBox(-self.halo_l, -self.halo_b, self.w + self.halo_r, self.h + self.halo_t)
 
   def produce(self, cell: kdb.Cell, trans: kdb.DTrans):
-    lindex = cell.layout().layer(self.layer)
-    cell.shapes(lindex).insert(trans * self.etrans * kdb.DBox(-self.enl_l, -self.enl_b, self.w + self.enl_r, self.h + self.enl_t))
+    if self.layer is not None:
+      lindex = cell.layout().layer(self.layer)
+      cell.shapes(lindex).insert(trans * self.etrans * self.bounding_box())

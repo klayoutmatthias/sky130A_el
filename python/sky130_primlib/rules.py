@@ -51,3 +51,12 @@ class Rules:
   min_drain         = 0.250     # poly.7 extension of diff beyond poly (min drain)
   poly_endcap       = 0.130     # poly.8 extension of poly beyond diffusion (endcap)
   
+  diff_width        = 0.150     # difftap.1 diff or tap width
+  
+  sdm_diff_enc      = 0.125     # nsd.5a, psd.5a
+  sdm_tap_enc       = 0.125     # nsd.5b, psd.5b
+  nwell_lvtn_enc    = 0.380     # lvtn.10
+  nwell_diff_enc    = 0.180     # difftap.8
+  nwell_tap_enc     = 0.180     # difftap.10
+  lvtn_gate_enc     = 0.180     # lvtn.4b
+  hvtp_gate_enc     = 0.180     # hvtp.3

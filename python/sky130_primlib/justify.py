@@ -24,8 +24,8 @@ class Justify(Node):
   def pack_box(self) -> kdb.DBox:
     return self._trans() * self.child.pack_box()
 
-  def feature_box(self) -> kdb.DBox:
-    return self._trans() * self.child.feature_box()
+  def feature_box(self, feature_name: str) -> kdb.DBox:
+    return self._trans() * self.child.feature_box(feature_name)
 
   def ref_point(self, name):
     return self._trans() * self.child.ref_point(name)

@@ -12,7 +12,7 @@ class MOSFETPCell(kdb.PCellDeclarationHelper):
     choices = [ (s, s) for s in models ]
     cont_choices = [ ( "None", 0 ), ( "Up to li", 1 ), ( "Up to met1", 2 ) ]
 
-    self.param("_version", self.TypeInt, "Version", hidden=True, default)
+    self.param("_version", self.TypeInt, "Version", hidden=True, default=0)
     self.param("model", self.TypeInt, "Model", choices=choices, default=models[0])
     self.param("w",  self.TypeDouble, "Width", default=1.0, unit="µm")
     self.param("l",  self.TypeDouble, "Length", default=0.15, unit="µm")

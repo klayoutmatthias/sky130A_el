@@ -19,6 +19,23 @@ models = [
   "pfet_1v8_hvt"
 ]
 
+impl_defs = {
+  "nfet_1v8_lvt": [ "nsd", "lvt" ],
+  "nfet_1v8":     [ "nsd" ],
+  "nfet_1v8_hvt": [ "nsd", "hvt" ],
+  "pfet_1v8_lvt": [ "nwell", "psd", "lvt" ],
+  "pfet_1v8":     [ "nwell", "psd" ],
+  "pfet_1v8_hvt": [ "nwell", "psd", "hvt" ]
+}
+
+impl_parts = {
+  "nsd": ( "diff", Rules.sdm_diff_enc, Layers.nsd ),
+  "psd": ( "diff", Rules.sdm_diff_enc, Layers.psd ),
+  "lvt": ( "gate", Rules.lvtn_gate_enc, Layers.lvtn ),
+  "hvt": ( "gate", Rules.hvtp_gate_enc, Layers.hvtp ),
+  "nwell": ( "diff", Rules.nwell_diff_enc, Layers.nwell )
+}
+
 def make_single_mosfet(model: str, w: float, l: float, l_cont: int, r_cont: int, l_half: bool, r_half: bool, min_poly_space: float):
   
   # NOTE: Rules.poly_diff_sep for gate connection ...
@@ -35,8 +52,9 @@ def make_single_mosfet(model: str, w: float, l: float, l_cont: int, r_cont: int,
   er = hr if r_half else ex
 
   poly = Rect(layer=Layers.poly, w=l, h=w, enl_t=et, enl_b=eb, halo_l=hl, halo_r=hr)
-  diff = Rect(layer=Layers.diff, w=l, h=w, enl_l=el, enl_r=er, halo_l=hl, halo_r=hr)
-  device = Linear(align="C", children=[ poly, diff ])
+  diff = Rect(layer=Layers.diff, w=l, h=w, enl_l=el, enl_r=er, halo_l=hl, halo_r=hr, name="diff")
+  gate = Rect(w=l, h=w, name="gate")
+  device = Linear(align="C", children=[ poly, diff, gate ])
   
   if l_cont > 0 or r_cont > 0:
   
@@ -74,11 +92,18 @@ def make_mosfet(model: str,
     chain.append(make_single_mosfet(model, w, l, l_cont, r_cont, l_half, r_half, min_poly_space))
 
   device = Linear(children=chain, align="HC")
+  
+  comp = [ device ]
+  
+  # Add well and marker layers
+  for id in impl_defs[model]:
+    feature, rule, layer = impl_parts[id]
+    comp.append(Rect(enclose=device, enclose_feature=feature, layer=layer, enl=rule))
 
   # Add the PR boundary rect and align  
-  marker_rect = Rect(enclose=device, enclose_pack=True, layer=Layers.pr_bnd)
+  comp.append(Rect(enclose=device, enclose_pack=True, layer=Layers.pr_bnd))
   
   return Justify(
-    child=Linear(children=[ marker_rect, device ], align="C"), 
+    child=Linear(children=comp, align="C"), 
     ref_point="SW"
   )

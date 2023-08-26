@@ -3,6 +3,7 @@ import pya as kdb
 
 class Layers:
   
+  nwell   = kdb.LayerInfo(64, 20)
   diff    = kdb.LayerInfo(65, 20)
   tap     = kdb.LayerInfo(65, 44)
   poly    = kdb.LayerInfo(66, 20)
@@ -19,5 +20,9 @@ class Layers:
   met4    = kdb.LayerInfo(71, 20)
   via4    = kdb.LayerInfo(71, 44)
   met5    = kdb.LayerInfo(72, 20)
+  nsd     = kdb.LayerInfo(93, 44)
+  psd     = kdb.LayerInfo(94, 20)
+  lvtn    = kdb.LayerInfo(125, 44)
+  hvtp    = kdb.LayerInfo(78, 44)
 
   pr_bnd  = kdb.LayerInfo(235, 4)

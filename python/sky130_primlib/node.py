@@ -51,9 +51,9 @@ class Node:
     """
     return kdb.DBox()
 
-  def feature_box(self) -> kdb.DBox:
+  def feature_box(self, feature_name: str) -> kdb.DBox:
     """
-    Returns the feature box
+    Returns the feature box for the given feature
     
     This is the bounding box of "interesting features",
     i.e. the MOS device without the nwell patch.

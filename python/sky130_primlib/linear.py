@@ -64,10 +64,10 @@ class Linear(Node):
       box += self.trans[i] * self.children[i].pack_box()
     return box
 
-  def feature_box(self) -> kdb.DBox:
+  def feature_box(self, feature_name: str) -> kdb.DBox:
     box = kdb.DBox()
     for i in range(0, len(self.children)):
-      box += self.trans[i] * self.children[i].feature_box()
+      box += self.trans[i] * self.children[i].feature_box(feature_name)
     return box
 
   def produce(self, cell: kdb.Cell, trans: kdb.DTrans):
