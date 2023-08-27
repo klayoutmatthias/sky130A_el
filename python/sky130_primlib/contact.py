@@ -198,12 +198,12 @@ def make_contact(via_name: str = "",
   via_def = via_defs[via_index]
   
   if make_bot:
-    ldeco = via_def.bot_layers(nx, ny, w, h)
+    lbot = via_def.bot_layers(nx, ny, w, h)
   else:
-    ldeco = []
-  ldeco.append(via_def.top_layer(nx, ny, w, h))
-  
-  _, top_enc_x, top_enc_y = ldeco[-1]
+    lbot = []
+    
+  ltop = via_def.top_layer(nx, ny, w, h)
+  _, top_enc_x, top_enc_y = ltop
   
   lvia, dim, space = via_def.via_layer(nx, ny, w, h)
   lvia = Layers.by_name(lvia)
@@ -215,10 +215,14 @@ def make_contact(via_name: str = "",
   array = Array(child=via_rect, nx=nx, ny=ny, w=w_via, h=h_via)
   stack = [array]
   
-  for ld in ldeco:
-    layer, enc_x, enc_y = ld
+  for lb in lbot:
+    layer, enc_x, enc_y = lb
     layer = Layers.by_name(layer)
-    stack.append(Rect(layer=layer, enclose=array, enl_x=enc_x, enl_y=enc_y, w=w, h=h))
+    stack.append(Rect(layer=layer, enclose=array, enl_x=enc_x, enl_y=enc_y, w=w-2*enc_x, h=h-2*enc_y))
+
+  layer, enc_x, enc_y = ltop
+  layer = Layers.by_name(layer)
+  stack.append(Rect(layer=layer, enclose=array, enl_x=enc_x, enl_y=enc_y, w=w-2*enc_x, h=h-2*enc_y, name="top"))
   
   return Justify(child = Linear(children=stack, align="C"), ref_point="C")
 

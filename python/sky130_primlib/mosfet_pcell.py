@@ -11,6 +11,7 @@ class MOSFETPCell(kdb.PCellDeclarationHelper):
 
     choices = [ (s, s) for s in models ]
     cont_choices = [ ( "None", 0 ), ( "Up to li", 1 ), ( "Up to met1", 2 ) ]
+    wire_choices = [ ( "None", 0 ), ( "Bottom", 1 ), ( "Top", 2 ), ( "Both", 3 ) ]
 
     self.param("_version", self.TypeInt, "Version", hidden=True, default=0)
     self.param("model", self.TypeInt, "Model", choices=choices, default=models[0])
@@ -20,6 +21,22 @@ class MOSFETPCell(kdb.PCellDeclarationHelper):
     self.param("min_poly_space", self.TypeDouble, "Min. Poly Space", default=0.0, unit="µm")
     self.param("source_cont", self.TypeInt, "Source Contacts", choices=cont_choices, default=1)
     self.param("drain_cont", self.TypeInt, "Drain Contacts", choices=cont_choices, default=1)
+    
+    self.param("gate_wire", self.TypeInt, "Gate wiring", choices=wire_choices, default=0)
+    self.param("gate_wire_width", self.TypeDouble, "Min. gate wire width", default=0.0, unit="µm")
+    self.param("gate_ext_bottom", self.TypeDouble, "Min. gate extension (bottom)", default=0.0, unit="µm")
+    self.param("gate_ext_top", self.TypeDouble, "Min. gate extension (top)", default=0.0, unit="µm")
+    
+    self.param("source_wire", self.TypeInt, "Source wiring (in LI, needs source contacts)", choices=wire_choices, default=0)
+    self.param("source_wire_width", self.TypeDouble, "Source wire width", default=0.0, unit="µm")
+    self.param("source_ext_bottom", self.TypeDouble, "Source LI extension (bottom)", default=0.0, unit="µm")
+    self.param("source_ext_top", self.TypeDouble, "Source LI extension (top)", default=0.0, unit="µm")
+    
+    self.param("drain_wire", self.TypeInt, "Drain wiring (in LI, needs drain contacts)", choices=wire_choices, default=0)
+    self.param("drain_wire_width", self.TypeDouble, "Drain wire width", default=0.0, unit="µm")
+    self.param("drain_ext_bottom", self.TypeDouble, "Drain LI extension (bottom)", default=0.0, unit="µm")
+    self.param("drain_ext_top", self.TypeDouble, "Drain LI extension (top)", default=0.0, unit="µm")
+    
 
   def coerce_param_impl(self):
     self.w = max(0.2, self.w)
@@ -30,10 +47,17 @@ class MOSFETPCell(kdb.PCellDeclarationHelper):
     return "MOSFET %s w:%.12g l:%.12g nf:%d" % (self.model, self.w, self.l, self.nf)
 
   def produce_impl(self):
-    gen = make_mosfet(model=self.model, 
-                      w=self.w, l=self.l, nf=self.nf,
-                      s_cont=self.source_cont, d_cont=self.drain_cont,
-                      min_poly_space=self.min_poly_space)
+  
+    gen = make_mosfet(
+            model=self.model, 
+            w=self.w, l=self.l, nf=self.nf,
+            s_cont=self.source_cont, d_cont=self.drain_cont,
+            min_poly_space=self.min_poly_space,
+            g_wire=self.gate_wire, poly_ext_top=self.gate_ext_top, poly_ext_bottom=self.gate_ext_bottom, g_wire_width=self.gate_wire_width,
+            s_wire=self.source_wire, s_li_ext_top=self.source_ext_top, s_li_ext_bottom=self.source_ext_bottom, s_wire_width=self.source_wire_width,
+            d_wire=self.drain_wire, d_li_ext_top=self.drain_ext_top, d_li_ext_bottom=self.drain_ext_bottom, d_wire_width=self.drain_wire_width
+          )
+                      
     gen.produce(self.cell, kdb.DTrans())
     
 
