@@ -8,61 +8,217 @@ from .rect import Rect
 from .rules import Rules
 from .layers import Layers
 
+def make_layer(layer, enc1, enc2 = None):
+  if enc2 is None:
+    return (layer, enc1, enc1)
+  else:
+    return (layer, enc1, enc2)
+  
+class LICONContact:
 
-bot_layers  = [ "diff",  "tap",   "poly",  "li",   "met1",  "met2",   "met3",   "met4" ]
-via_layers  = [ "licon", "licon", "licon", "mcon", "via1",  "via2",   "via3",   "via4" ]
-top_layers  = [ "li",    "li",    "li",    "met1", "met2",  "met3",   "met4",   "met5" ]
+  li_enc = (Rules.li_licon_enc_one, Rules.li_licon_enc, Rules.li_licon_enc_all)
 
-licon_enc   = [ Rules.li_licon_enc_one, Rules.li_licon_enc, Rules.li_licon_enc_all ]
+  def via_layer(self, nx: int, ny: int, w: float, h: float):
+    # name, dimension, spacing
+    return ("licon", Rules.licon_size, Rules.licon_spacing)
 
-bot_encs    = [ Rules.diff_con_enc,   Rules.tap_con_enc,    Rules.poly_con_enc,   Rules.mcon_li_enc,    Rules.met1_via1_enc,  Rules.met2_via2_enc,  Rules.met3_via3_enc,  Rules.met4_via4_enc   ]
-top_encs    = [ licon_enc,            licon_enc,            licon_enc,            Rules.mcon_met1_enc,  Rules.met2_via1_enc,  Rules.met3_via2_enc,  Rules.met4_via3_enc,  Rules.met5_via4_enc   ]
-dims        = [ Rules.licon_size,     Rules.licon_size,     Rules.licon_size,     Rules.mcon_size,      Rules.via1_size,      Rules.via2_size,      Rules.via3_size,      Rules.via4_size       ]
-spaces      = [ Rules.licon_spacing,  Rules.licon_spacing,  Rules.licon_spacing,  Rules.mcon_spacing,   Rules.via1_spacing,   Rules.via2_spacing,   Rules.via3_spacing,   Rules.via4_spacing    ]
+  def top_layer(self, nx: int, ny: int, w: float, h: float):
+    single_x = (nx == 1 and w < Rules.licon_size - 1e-10)
+    single_y = (ny == 1 and h < Rules.licon_size - 1e-10)
+    if single_x != single_y:
+      if single_x:
+        top_enc_x, top_enc_y, _ = LICONContact.li_enc
+      else:
+        top_enc_y, top_enc_x, _ = LICONContact.li_enc
+    else:
+      top_enc_x = top_enc_y = LICONContact.li_enc[2]
+    # name, enclosure_x, enclosure_y
+    return make_layer("li", top_enc_x, top_enc_y)
 
-def make_contact(bot_name: str = "", 
-                 bot_index: int = None, 
+class NTapContact(LICONContact):
+
+  def __init__(self):
+    self.name = "ntap"
+    self.description = "N Tap"
+
+  def bot_layers(self, nx: int, ny: int, w: float, h: float):
+    # returns an array of (name, enl) or (name, enl_x, enl_y) tuples
+    return [
+      make_layer("tap", Rules.tap_con_enc),
+      make_layer("nsdm", Rules.sdm_tap_enc + Rules.tap_con_enc)
+    ]
+
+class PTapContact(LICONContact):
+
+  def __init__(self):
+    self.name = "ptap"
+    self.description = "P Tap"
+
+  def bot_layers(self, nx: int, ny: int, w: float, h: float):
+    # returns an array of (name, enl) or (name, enl_x, enl_y) tuples
+    return [
+      make_layer("tap", Rules.tap_con_enc),
+      make_layer("psdm", Rules.sdm_tap_enc + Rules.tap_con_enc)
+    ]
+
+class PolyContact(LICONContact):
+
+  def __init__(self):
+    self.name = "poly"
+    self.description = "Poly"
+
+  def bot_layers(self, nx: int, ny: int, w: float, h: float):
+    # returns an array of (name, enl) or (name, enl_x, enl_y) tuples
+    return [
+      make_layer("poly", Rules.poly_con_enc),
+      make_layer("npc", Rules.npc_poly_con_enc)
+    ]
+
+class DiffContact(LICONContact):
+
+  def __init__(self):
+    self.name = "diff"
+    self.description = "Diff"
+
+  def bot_layers(self, nx: int, ny: int, w: float, h: float):
+    # returns an array of (name, enl) or (name, enl_x, enl_y) tuples
+    return [
+      make_layer("diff", Rules.diff_con_enc),
+    ]
+
+class LIContact:
+
+  def __init__(self):
+    self.name = "li"
+    self.description = "LI to Met1"
+
+  def bot_layers(self, nx: int, ny: int, w: float, h: float):
+    return [make_layer("li", Rules.mcon_li_enc)]
+    
+  def via_layer(self, nx: int, ny: int, w: float, h: float):
+    return ("mcon", Rules.mcon_size, Rules.mcon_spacing)
+
+  def top_layer(self, nx: int, ny: int, w: float, h: float):
+    return make_layer("met1", Rules.mcon_met1_enc)
+
+class M1Contact:
+
+  def __init__(self):
+    self.name = "met1"
+    self.description = "Met1 to Met2"
+
+  def bot_layers(self, nx: int, ny: int, w: float, h: float):
+    return [make_layer("met1", Rules.met1_via1_enc)]
+    
+  def via_layer(self, nx: int, ny: int, w: float, h: float):
+    return ("via1", Rules.via1_size, Rules.via1_spacing)
+
+  def top_layer(self, nx: int, ny: int, w: float, h: float):
+    return make_layer("met2", Rules.met2_via1_enc)
+
+class M2Contact:
+
+  def __init__(self):
+    self.name = "met2"
+    self.description = "Met2 to Met3"
+
+  def bot_layers(self, nx: int, ny: int, w: float, h: float):
+    return [make_layer("met2", Rules.met2_via2_enc)]
+    
+  def via_layer(self, nx: int, ny: int, w: float, h: float):
+    return ("via2", Rules.via2_size, Rules.via2_spacing)
+
+  def top_layer(self, nx: int, ny: int, w: float, h: float):
+    return make_layer("met3", Rules.met3_via2_enc)
+
+class M3Contact:
+
+  def __init__(self):
+    self.name = "met3"
+    self.description = "Met3 to Met4"
+
+  def bot_layers(self, nx: int, ny: int, w: float, h: float):
+    return [make_layer("met3", Rules.met3_via3_enc)]
+    
+  def via_layer(self, nx: int, ny: int, w: float, h: float):
+    return ("via3", Rules.via3_size, Rules.via3_spacing)
+
+  def top_layer(self, nx: int, ny: int, w: float, h: float):
+    return make_layer("met4", Rules.met4_via3_enc)
+
+class M4Contact:
+
+  def __init__(self):
+    self.name = "met4"
+    self.description = "Met4 to Met5"
+
+  def bot_layers(self, nx: int, ny: int, w: float, h: float):
+    return [make_layer("met4", Rules.met4_via4_enc)]
+    
+  def via_layer(self, nx: int, ny: int, w: float, h: float):
+    return ("via4", Rules.via4_size, Rules.via4_spacing)
+
+  def top_layer(self, nx: int, ny: int, w: float, h: float):
+    single_x = (nx == 1)
+    single_y = (ny == 1)
+    enc_y = enc_x = Rules.met5_via4_enc
+    e1 = 0.5 * (Rules.met5_width - Rules.via4_size)
+    if single_x:
+      enc_x = e1
+    if single_y:
+      enc_y = e1
+    return make_layer("met5", enc_x, enc_y)
+
+
+via_defs = [
+  NTapContact(),
+  PTapContact(),
+  PolyContact(),
+  DiffContact(),
+  LIContact(),
+  M1Contact(),
+  M2Contact(),
+  M3Contact(),
+  M4Contact()
+]  
+
+def make_contact(via_name: str = "", 
+                 via_index: int = None, 
                  nx: int = 1, ny: int = 1, 
                  w: float = 0.0, h: float = 0.0,
                  make_bot: bool = True):
                 
-  if bot_index is None:
-    bot_index = bot_layers.index(bot_name)
-    
-  lbot = Layers.__dict__[bot_layers[bot_index]]
-  ltop = Layers.__dict__[top_layers[bot_index]]
-  lvia = Layers.__dict__[via_layers[bot_index]]
+  if via_index is None:
+    via_index = 0
+    for i in range(0, len(via_defs)):
+      if via_defs[i].name == via_name:
+        via_index = i
+        break
 
-  bot_enc = bot_encs[bot_index]
-  top_enc = top_encs[bot_index]
-  dim     = dims[bot_index]
-  space   = spaces[bot_index]
-  
-  if type(top_enc) is list:
-    single_x = (nx == 1 and w == 0.0)
-    single_y = (ny == 1 and h == 0.0)
-    if single_x != single_y:
-      if single_x:
-        top_enc_x, top_enc_y, _ = top_enc
-      else:
-        top_enc_y, top_enc_x, _ = top_enc
-    else:
-      top_enc_x = top_enc_y = top_enc[2]
-  else:
-    top_enc_x = top_enc_y = top_enc
-  
-  w_via = w - max(bot_enc, top_enc_x) * 2
-  h_via = h - max(bot_enc, top_enc_y) * 2
-
-  via_rect      = Rect(layer = lvia, w = dim, h = dim, halo = space * 0.5)
-
-  array         = Array(child = via_rect, nx = nx, ny = ny, w = w_via, h = h_via)
-  top_met_added = Rect(layer = ltop, enclose = array, enl_x = top_enc_x, enl_y = top_enc_y, w = w, h = h)
-  stack = [ array, top_met_added ]
+  via_def = via_defs[via_index]
   
   if make_bot:
-    bot_met_added = Rect(layer = lbot, enclose = array, enl = bot_enc, w = w, h = h)
-    stack.append(bot_met_added)
+    ldeco = via_def.bot_layers(nx, ny, w, h)
+  else:
+    ldeco = []
+  ldeco.append(via_def.top_layer(nx, ny, w, h))
   
-  return Justify(child = Linear(children = stack, align = "C"), ref_point = "C")
+  _, top_enc_x, top_enc_y = ldeco[-1]
+  
+  lvia, dim, space = via_def.via_layer(nx, ny, w, h)
+  lvia = Layers.by_name(lvia)
+  
+  w_via = w - top_enc_x * 2
+  h_via = h - top_enc_y * 2
+
+  via_rect = Rect(layer=lvia, w=dim, h=dim, halo=space * 0.5)
+  array = Array(child=via_rect, nx=nx, ny=ny, w=w_via, h=h_via)
+  stack = [array]
+  
+  for ld in ldeco:
+    layer, enc_x, enc_y = ld
+    layer = Layers.by_name(layer)
+    stack.append(Rect(layer=layer, enclose=array, enl_x=enc_x, enl_y=enc_y, w=w, h=h))
+  
+  return Justify(child = Linear(children=stack, align="C"), ref_point="C")
 

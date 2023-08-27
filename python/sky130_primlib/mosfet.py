@@ -13,24 +13,22 @@ from .justify import Justify
 models = [
   "nfet_1v8_lvt",
   "nfet_1v8",
-  "nfet_1v8_hvt",
   "pfet_1v8_lvt",
   "pfet_1v8",
-  "pfet_1v8_hvt"
+  "pfet_1v8_hvt",
 ]
 
 impl_defs = {
-  "nfet_1v8_lvt": [ "nsd", "lvt" ],
-  "nfet_1v8":     [ "nsd" ],
-  "nfet_1v8_hvt": [ "nsd", "hvt" ],
-  "pfet_1v8_lvt": [ "nwell", "psd", "lvt" ],
-  "pfet_1v8":     [ "nwell", "psd" ],
-  "pfet_1v8_hvt": [ "nwell", "psd", "hvt" ]
+  "nfet_1v8_lvt": [ "nsdm", "lvt" ],
+  "nfet_1v8":     [ "nsdm" ],
+  "pfet_1v8_lvt": [ "nwell", "psdm", "lvt" ],
+  "pfet_1v8":     [ "nwell", "psdm" ],
+  "pfet_1v8_hvt": [ "nwell", "psdm", "hvt" ]
 }
 
 impl_parts = {
-  "nsd": ( "diff", Rules.sdm_diff_enc, Layers.nsd ),
-  "psd": ( "diff", Rules.sdm_diff_enc, Layers.psd ),
+  "nsdm": ( "diff", Rules.sdm_diff_enc, Layers.nsdm ),
+  "psdm": ( "diff", Rules.sdm_diff_enc, Layers.psdm ),
   "lvt": ( "gate", Rules.lvtn_gate_enc, Layers.lvtn ),
   "hvt": ( "gate", Rules.hvtp_gate_enc, Layers.hvtp ),
   "nwell": ( "diff", Rules.nwell_diff_enc, Layers.nwell )

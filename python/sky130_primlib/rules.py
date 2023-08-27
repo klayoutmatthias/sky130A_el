@@ -34,14 +34,16 @@ class Rules:
   
   li_width          = 0.170     # li.1
   li_spacing        = 0.170     # li.3
-  m1_width          = 0.140     # m1.1
-  m1_spacing        = 0.140     # m1.2
-  m2_width          = 0.140     # m2.1
-  m2_spacing        = 0.140     # m2.2
-  m3_width          = 0.300     # m3.1
-  m3_spacing        = 0.300     # m3.2
-  m4_width          = 0.300     # m4.1
-  m4_spacing        = 0.300     # m4.2
+  met1_width        = 0.140     # m1.1
+  met1_spacing      = 0.140     # m1.2
+  met2_width        = 0.140     # m2.1
+  met2_spacing      = 0.140     # m2.2
+  met3_width        = 0.300     # m3.1
+  met3_spacing      = 0.300     # m3.2
+  met4_width        = 0.300     # m4.1
+  met4_spacing      = 0.300     # m4.2
+  met5_width        = 1.600     # m5.1
+  met5_spacing      = 1.600     # m5.2
 
   poly_width        = 0.150     # poly.1a width of poly 
   poly_spacing      = 0.210     # poly.2 spacing of poly
