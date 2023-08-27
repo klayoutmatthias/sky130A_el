@@ -17,6 +17,9 @@ def make_layer(layer, enc1, enc2 = None):
 
 class ContactBase:
 
+  def __init__(self):
+    self.bottom_is_metal = True
+    
   def well_layers(self, nx: int, ny: int, w: float, h: float):
     return [
       make_layer("pr_bnd", 0.0)
@@ -24,6 +27,10 @@ class ContactBase:
     
 class LICONContact(ContactBase):
 
+  def __init__(self):
+    super().__init__()
+    self.bottom_is_metal = False
+    
   li_enc = (Rules.li_licon_enc_one, Rules.li_licon_enc)
 
   def via_layer(self, nx: int, ny: int, w: float, h: float):
@@ -46,6 +53,7 @@ class LICONContact(ContactBase):
 class NTapContact(LICONContact):
 
   def __init__(self):
+    super().__init__()
     self.name = "ntap"
     self.description = "N Tap"
 
@@ -65,6 +73,7 @@ class NTapContact(LICONContact):
 class PTapContact(LICONContact):
 
   def __init__(self):
+    super().__init__()
     self.name = "ptap"
     self.description = "P Tap"
 
@@ -78,6 +87,7 @@ class PTapContact(LICONContact):
 class PolyContact(LICONContact):
 
   def __init__(self):
+    super().__init__()
     self.name = "poly"
     self.description = "Poly"
 
@@ -91,6 +101,7 @@ class PolyContact(LICONContact):
 class DiffContact(LICONContact):
 
   def __init__(self):
+    super().__init__()
     self.name = "diff"
     self.description = "Diff"
 
@@ -102,7 +113,10 @@ class DiffContact(LICONContact):
 
 class LIContact(ContactBase):
 
+  li_enc = (Rules.mcon_met1_enc_one, Rules.mcon_met1_enc)
+
   def __init__(self):
+    super().__init__()
     self.name = "li"
     self.description = "LI to Met1"
 
@@ -113,11 +127,22 @@ class LIContact(ContactBase):
     return ("mcon", Rules.mcon_size, Rules.mcon_spacing)
 
   def top_layer(self, nx: int, ny: int, w: float, h: float):
-    return make_layer("met1", Rules.mcon_met1_enc)
+    single_x = (nx == 1 and w < Rules.mcon_size - 1e-10)
+    single_y = (ny == 1 and h < Rules.mcon_size - 1e-10)
+    if single_x != single_y:
+      if single_x:
+        top_enc_x, top_enc_y = LIContact.li_enc
+      else:
+        top_enc_y, top_enc_x = LIContact.li_enc
+    else:
+      top_enc_x = top_enc_y = Rules.mcon_met1_enc
+    # name, enclosure_x, enclosure_y
+    return make_layer("met1", top_enc_x, top_enc_y)
 
 class M1Contact(ContactBase):
 
   def __init__(self):
+    super().__init__()
     self.name = "met1"
     self.description = "Met1 to Met2"
 
@@ -133,6 +158,7 @@ class M1Contact(ContactBase):
 class M2Contact(ContactBase):
 
   def __init__(self):
+    super().__init__()
     self.name = "met2"
     self.description = "Met2 to Met3"
 
@@ -148,6 +174,7 @@ class M2Contact(ContactBase):
 class M3Contact(ContactBase):
 
   def __init__(self):
+    super().__init__()
     self.name = "met3"
     self.description = "Met3 to Met4"
 
@@ -163,6 +190,7 @@ class M3Contact(ContactBase):
 class M4Contact(ContactBase):
 
   def __init__(self):
+    super().__init__()
     self.name = "met4"
     self.description = "Met4 to Met5"
 
@@ -201,7 +229,11 @@ def make_contact(via_name: str = "",
                  nx: int = 1, ny: int = 1, 
                  w: float = 0.0, h: float = 0.0,
                  make_bot: bool = True,
-                 as_ring: bool = False):
+                 as_ring: bool = False,
+                 ring_left: bool = True,
+                 ring_right: bool = True,
+                 ring_top: bool = True,
+                 ring_bottom: bool = True):
                 
   if via_index is None:
     via_index = 0
@@ -229,6 +261,7 @@ def make_contact(via_name: str = "",
   lvia = Layers.by_name(lvia)
   
   arrays = []
+  side_enabled = []
   
   if as_ring:
   
@@ -241,8 +274,10 @@ def make_contact(via_name: str = "",
     well_area = Rect(layer = None, w=w, h=h)
     align = Rect(layer = None, enclose=well_area, halo_x=0.5*(w_outside-w), halo_y=0.5*(h_outside-h))
     via_rect = Rect(layer=lvia, w=dim, h=dim, halo=space * 0.5, name="via")
+    via_rect_dummy = Rect(layer=None, w=dim, h=dim, halo=space * 0.5, name="via")
     
     sides = [ [], [], [], [] ]
+    side_enabled = [ ring_top, ring_bottom, ring_left, ring_right ]
     
     for arr_def in [
       (cnx, ny, "NW", 0),
@@ -255,7 +290,8 @@ def make_contact(via_name: str = "",
       (nx, cny, "NE", 3)
     ]:
       ax, ay, al, si = arr_def
-      array = Array(child=via_rect, nx=ax, ny=ay)
+      flag = side_enabled[si]
+      array = Array(child=via_rect if flag else via_rect_dummy, nx=ax, ny=ay)
       sides[si].append(Linear(children=[ align, array ], align=al))
     
     for side_elements in sides:
@@ -267,26 +303,31 @@ def make_contact(via_name: str = "",
     h_via = h - top_enc_y * 2
 
     via_rect = Rect(layer=lvia, w=dim, h=dim, halo=space * 0.5, name="via")
-    arrays.append(Array(child=via_rect, nx=nx, ny=ny, w=w_via, h=h_via))
+    
+    arrays = [ Array(child=via_rect, nx=nx, ny=ny, w=w_via, h=h_via) ]
+    side_enabled = [ True ]
 
   stacks = []
 
-  for array in arrays:    
-  
+  for i in range(0, len(arrays)):
+    
+    array = arrays[i]
     stack = [array]
       
-    for lb in lbot:
-      layer, enc_x, enc_y = lb
+    if side_enabled[i] or not via_def.bottom_is_metal:
+      for lb in lbot:
+        layer, enc_x, enc_y = lb
+        layer = Layers.by_name(layer)
+        wr = 0.0 if as_ring else w - 2 * enc_x
+        hr = 0.0 if as_ring else h - 2 * enc_y
+        stack.append(Rect(layer=layer, enclose=array, enclose_feature="via", enl_x=enc_x, enl_y=enc_y, w=wr, h=hr))
+  
+    if side_enabled[i]:
+      layer, enc_x, enc_y = ltop
       layer = Layers.by_name(layer)
       wr = 0.0 if as_ring else w - 2 * enc_x
       hr = 0.0 if as_ring else h - 2 * enc_y
-      stack.append(Rect(layer=layer, enclose=array, enclose_feature="via", enl_x=enc_x, enl_y=enc_y, w=wr, h=hr))
-  
-    layer, enc_x, enc_y = ltop
-    layer = Layers.by_name(layer)
-    wr = 0.0 if as_ring else w - 2 * enc_x
-    hr = 0.0 if as_ring else h - 2 * enc_y
-    stack.append(Rect(layer=layer, enclose=array, enclose_feature="via", enl_x=enc_x, enl_y=enc_y, w=wr, h=hr, name="top"))
+      stack.append(Rect(layer=layer, enclose=array, enclose_feature="via", enl_x=enc_x, enl_y=enc_y, w=wr, h=hr, name="top"))
       
     stacks.append(Linear(children=stack, align=None))
     

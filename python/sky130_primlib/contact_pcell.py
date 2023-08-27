@@ -18,6 +18,10 @@ class ContactPCell(kdb.PCellDeclarationHelper):
     self.param("w",  self.TypeDouble, "Width (or columns, whichever is larger)", default = 0)
     self.param("h",  self.TypeDouble, "Height (or rows, whichever is larger)", default = 0)
     self.param("as_ring", self.TypeBoolean, "As ring with center dimension w x h", default = False)
+    self.param("l_open", self.TypeBoolean, "Ring left side open", default = False)
+    self.param("r_open", self.TypeBoolean, "Ring right side open", default = False)
+    self.param("b_open", self.TypeBoolean, "Ring bottom side open", default = False)
+    self.param("t_open", self.TypeBoolean, "Ring top side open", default = False)
 
   def _via_index(self):
     for i in range(0, len(via_defs)):
@@ -33,7 +37,15 @@ class ContactPCell(kdb.PCellDeclarationHelper):
     return "Contact %s %d,%d (nx,ny) %.12g,%.12g (w,h)" % (self.via, self.nx, self.ny, self.w, self.h)
 
   def produce_impl(self):
-    gen = make_contact(via_index = self._via_index(), nx = self.nx, ny = self.ny, w = self.w, h = self.h, as_ring=self.as_ring)
+    gen = make_contact(via_index = self._via_index(), 
+                       nx = self.nx, ny = self.ny, 
+                       w = self.w, h = self.h, 
+                       as_ring=self.as_ring,
+                       ring_left=not self.l_open,
+                       ring_right=not self.r_open,
+                       ring_top=not self.t_open,
+                       ring_bottom=not self.b_open
+                      )
     gen.produce(self.cell, kdb.DTrans())
     
 

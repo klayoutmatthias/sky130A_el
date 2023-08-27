@@ -14,7 +14,8 @@ class Rules:
   mcon_li_enc       = 0.000     # ct.4 enclosure of contact by li
   mcon_size         = 0.170     # ct.1 li to met1 contact size
   mcon_spacing      = 0.190     # ct.2 li to met1 contact to contact spacing
-  mcon_met1_enc     = 0.030     # m1.4 enclosure of contact by met1
+  mcon_met1_enc     = 0.060     # m1.5 enclosure of contact by met1
+  mcon_met1_enc_one = 0.030     # m1.4 enclosure of contact by met1, one of two adjacent sides
   via1_size         = 0.150     # via.1a met1 to met2 via1 size
   via1_spacing      = 0.170     # via.2 met1 to met2 via to via spacing
   met1_via1_enc     = 0.085     # via.5a enclosure of via1 by met1
