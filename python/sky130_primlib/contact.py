@@ -1,4 +1,5 @@
 
+import math
 import pya as kdb
 
 from .array import Array
@@ -13,10 +14,17 @@ def make_layer(layer, enc1, enc2 = None):
     return (layer, enc1, enc1)
   else:
     return (layer, enc1, enc2)
-  
-class LICONContact:
 
-  li_enc = (Rules.li_licon_enc_one, Rules.li_licon_enc, Rules.li_licon_enc_all)
+class ContactBase:
+
+  def well_layers(self, nx: int, ny: int, w: float, h: float):
+    return [
+      make_layer("pr_bnd", 0.0)
+    ]
+    
+class LICONContact(ContactBase):
+
+  li_enc = (Rules.li_licon_enc_one, Rules.li_licon_enc)
 
   def via_layer(self, nx: int, ny: int, w: float, h: float):
     # name, dimension, spacing
@@ -27,11 +35,11 @@ class LICONContact:
     single_y = (ny == 1 and h < Rules.licon_size - 1e-10)
     if single_x != single_y:
       if single_x:
-        top_enc_x, top_enc_y, _ = LICONContact.li_enc
+        top_enc_x, top_enc_y = LICONContact.li_enc
       else:
-        top_enc_y, top_enc_x, _ = LICONContact.li_enc
+        top_enc_y, top_enc_x = LICONContact.li_enc
     else:
-      top_enc_x = top_enc_y = LICONContact.li_enc[2]
+      top_enc_x = top_enc_y = Rules.li_licon_enc
     # name, enclosure_x, enclosure_y
     return make_layer("li", top_enc_x, top_enc_y)
 
@@ -44,8 +52,14 @@ class NTapContact(LICONContact):
   def bot_layers(self, nx: int, ny: int, w: float, h: float):
     # returns an array of (name, enl) or (name, enl_x, enl_y) tuples
     return [
+      make_layer("nwell", Rules.nwell_tap_enc + Rules.tap_con_enc),
       make_layer("tap", Rules.tap_con_enc),
       make_layer("nsdm", Rules.sdm_tap_enc + Rules.tap_con_enc)
+    ]
+    
+  def well_layers(self, nx: int, ny: int, w: float, h: float):
+    return super().well_layers(nx, ny, w, h) + [
+      make_layer("nwell", 0.0)
     ]
 
 class PTapContact(LICONContact):
@@ -86,7 +100,7 @@ class DiffContact(LICONContact):
       make_layer("diff", Rules.diff_con_enc),
     ]
 
-class LIContact:
+class LIContact(ContactBase):
 
   def __init__(self):
     self.name = "li"
@@ -101,7 +115,7 @@ class LIContact:
   def top_layer(self, nx: int, ny: int, w: float, h: float):
     return make_layer("met1", Rules.mcon_met1_enc)
 
-class M1Contact:
+class M1Contact(ContactBase):
 
   def __init__(self):
     self.name = "met1"
@@ -116,7 +130,7 @@ class M1Contact:
   def top_layer(self, nx: int, ny: int, w: float, h: float):
     return make_layer("met2", Rules.met2_via1_enc)
 
-class M2Contact:
+class M2Contact(ContactBase):
 
   def __init__(self):
     self.name = "met2"
@@ -131,7 +145,7 @@ class M2Contact:
   def top_layer(self, nx: int, ny: int, w: float, h: float):
     return make_layer("met3", Rules.met3_via2_enc)
 
-class M3Contact:
+class M3Contact(ContactBase):
 
   def __init__(self):
     self.name = "met3"
@@ -146,7 +160,7 @@ class M3Contact:
   def top_layer(self, nx: int, ny: int, w: float, h: float):
     return make_layer("met4", Rules.met4_via3_enc)
 
-class M4Contact:
+class M4Contact(ContactBase):
 
   def __init__(self):
     self.name = "met4"
@@ -186,7 +200,8 @@ def make_contact(via_name: str = "",
                  via_index: int = None, 
                  nx: int = 1, ny: int = 1, 
                  w: float = 0.0, h: float = 0.0,
-                 make_bot: bool = True):
+                 make_bot: bool = True,
+                 as_ring: bool = False):
                 
   if via_index is None:
     via_index = 0
@@ -204,25 +219,81 @@ def make_contact(via_name: str = "",
     
   ltop = via_def.top_layer(nx, ny, w, h)
   _, top_enc_x, top_enc_y = ltop
+
+  if as_ring:
+    lwells = via_def.well_layers(nx, ny, w, h)
+  else:
+    lwells = []
   
   lvia, dim, space = via_def.via_layer(nx, ny, w, h)
   lvia = Layers.by_name(lvia)
   
-  w_via = w - top_enc_x * 2
-  h_via = h - top_enc_y * 2
-
-  via_rect = Rect(layer=lvia, w=dim, h=dim, halo=space * 0.5)
-  array = Array(child=via_rect, nx=nx, ny=ny, w=w_via, h=h_via)
-  stack = [array]
+  arrays = []
   
-  for lb in lbot:
-    layer, enc_x, enc_y = lb
+  if as_ring:
+  
+    w_outside = w + nx * (dim + space)
+    h_outside = h + ny * (dim + space)
+    
+    cnx = int(math.floor(w_outside / (dim + space) + 1e-10)) // 2
+    cny = int(math.floor(h_outside / (dim + space) + 1e-10)) // 2
+    
+    well_area = Rect(layer = None, w=w, h=h)
+    align = Rect(layer = None, enclose=well_area, halo_x=0.5*(w_outside-w), halo_y=0.5*(h_outside-h))
+    via_rect = Rect(layer=lvia, w=dim, h=dim, halo=space * 0.5, name="via")
+    
+    sides = [ [], [], [], [] ]
+    
+    for arr_def in [
+      (cnx, ny, "NW", 0),
+      (cnx, ny, "NE", 0),
+      (cnx, ny, "SW", 1),
+      (cnx, ny, "SE", 1),
+      (nx, cny, "SW", 2),
+      (nx, cny, "NW", 2),
+      (nx, cny, "SE", 3),
+      (nx, cny, "NE", 3)
+    ]:
+      ax, ay, al, si = arr_def
+      array = Array(child=via_rect, nx=ax, ny=ay)
+      sides[si].append(Linear(children=[ align, array ], align=al))
+    
+    for side_elements in sides:
+      arrays.append(Linear(children=side_elements, align=None))
+      
+  else:
+      
+    w_via = w - top_enc_x * 2
+    h_via = h - top_enc_y * 2
+
+    via_rect = Rect(layer=lvia, w=dim, h=dim, halo=space * 0.5, name="via")
+    arrays.append(Array(child=via_rect, nx=nx, ny=ny, w=w_via, h=h_via))
+
+  stacks = []
+
+  for array in arrays:    
+  
+    stack = [array]
+      
+    for lb in lbot:
+      layer, enc_x, enc_y = lb
+      layer = Layers.by_name(layer)
+      wr = 0.0 if as_ring else w - 2 * enc_x
+      hr = 0.0 if as_ring else h - 2 * enc_y
+      stack.append(Rect(layer=layer, enclose=array, enclose_feature="via", enl_x=enc_x, enl_y=enc_y, w=wr, h=hr))
+  
+    layer, enc_x, enc_y = ltop
     layer = Layers.by_name(layer)
-    stack.append(Rect(layer=layer, enclose=array, enl_x=enc_x, enl_y=enc_y, w=w-2*enc_x, h=h-2*enc_y))
-
-  layer, enc_x, enc_y = ltop
-  layer = Layers.by_name(layer)
-  stack.append(Rect(layer=layer, enclose=array, enl_x=enc_x, enl_y=enc_y, w=w-2*enc_x, h=h-2*enc_y, name="top"))
+    wr = 0.0 if as_ring else w - 2 * enc_x
+    hr = 0.0 if as_ring else h - 2 * enc_y
+    stack.append(Rect(layer=layer, enclose=array, enclose_feature="via", enl_x=enc_x, enl_y=enc_y, w=wr, h=hr, name="top"))
+      
+    stacks.append(Linear(children=stack, align=None))
+    
+  for lw in lwells:
+    layer, enc_x, enc_y = lw
+    layer = Layers.by_name(layer)
+    stacks.append(Rect(layer=layer, enclose=well_area, enl_x=enc_x, enl_y=enc_y))
   
-  return Justify(child = Linear(children=stack, align="C"), ref_point="C")
+  return Justify(child=Linear(children=stacks, align=None), ref_point="C")
 

@@ -17,6 +17,7 @@ class ContactPCell(kdb.PCellDeclarationHelper):
     self.param("ny", self.TypeInt, "Rows (or height, whichever is larger)", default = 1)
     self.param("w",  self.TypeDouble, "Width (or columns, whichever is larger)", default = 0)
     self.param("h",  self.TypeDouble, "Height (or rows, whichever is larger)", default = 0)
+    self.param("as_ring", self.TypeBoolean, "As ring with center dimension w x h", default = False)
 
   def _via_index(self):
     for i in range(0, len(via_defs)):
@@ -32,7 +33,7 @@ class ContactPCell(kdb.PCellDeclarationHelper):
     return "Contact %s %d,%d (nx,ny) %.12g,%.12g (w,h)" % (self.via, self.nx, self.ny, self.w, self.h)
 
   def produce_impl(self):
-    gen = make_contact(via_index = self._via_index(), nx = self.nx, ny = self.ny, w = self.w, h = self.h)
+    gen = make_contact(via_index = self._via_index(), nx = self.nx, ny = self.ny, w = self.w, h = self.h, as_ring=self.as_ring)
     gen.produce(self.cell, kdb.DTrans())
     
 

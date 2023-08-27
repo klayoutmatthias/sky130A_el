@@ -20,37 +20,47 @@ class Linear(Node):
     * VC: bottom to top, center-aligned
     * VR: bottom to top, right-aligned
     * <other ref point>: stack at ref point
+    
+    If "align" is None, the children will simply be stacked
     """
     
-    ref_points = {
-      "HB": ( "SW", "SE" ),
-      "HC": ( "W", "E" ),
-      "HT": ( "NW", "NE" ),
-      "VL": ( "SW", "NW" ),
-      "VC": ( "S", "N" ),
-      "VR": ( "SE", "NE" )
-    }
-    
-    if align in ref_points:
-      rp, prev_rp = ref_points[align]
-    else:
-      prev_rp = rp = align
-    
     self.children = children
+    self.trans = []
+    
     if len(children) == 0:
       return
       
-    prev = None
-    self.trans = []
+    if align == None:
     
-    for c in children:
-      curr = c.ref_point(rp)
-      if prev is None:
-        trans = kdb.DTrans()
+      for c in children:
+        self.trans.append(kdb.DTrans())
+      
+    else:
+      
+      ref_points = {
+        "HB": ( "SW", "SE" ),
+        "HC": ( "W", "E" ),
+        "HT": ( "NW", "NE" ),
+        "VL": ( "SW", "NW" ),
+        "VC": ( "S", "N" ),
+        "VR": ( "SE", "NE" )
+      }
+      
+      if align in ref_points:
+        rp, prev_rp = ref_points[align]
       else:
-        trans = kdb.DTrans(prev - curr)
-      self.trans.append(trans)
-      prev = trans * c.ref_point(prev_rp)
+        prev_rp = rp = align
+      
+      prev = None
+      
+      for c in children:
+        curr = c.ref_point(rp)
+        if prev is None:
+          trans = kdb.DTrans()
+        else:
+          trans = kdb.DTrans(prev - curr)
+        self.trans.append(trans)
+        prev = trans * c.ref_point(prev_rp)
       
   def bounding_box(self) -> kdb.DBox:
     box = kdb.DBox()
