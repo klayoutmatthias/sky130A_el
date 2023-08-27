@@ -74,7 +74,8 @@ def make_single_mosfet(param: MOSFETParam, drain_is_left: bool):
 
   poly = Rect(layer=Layers.poly, w=l, h=w, enl_t=et, enl_b=eb, halo_l=hl, halo_r=hr, name="poly")
   diff = Rect(layer=Layers.diff, w=l, h=w, enl_l=el, enl_r=er, halo_l=hl, halo_r=hr, name="diff")
-  device = Linear(align="C", children=[ poly, diff ])
+  gate = Rect(layer=None, w=l, h=w, name="gate")
+  device = Linear(align="C", children=[ gate, poly, diff ])
   
   if param.l_cont > 0 or param.r_cont > 0:
   
