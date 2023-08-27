@@ -40,7 +40,7 @@ class LICONContact(ContactBase):
   def top_layer(self, nx: int, ny: int, w: float, h: float):
     single_x = (nx == 1 and w < Rules.licon_size - 1e-10)
     single_y = (ny == 1 and h < Rules.licon_size - 1e-10)
-    if single_x != single_y:
+    if single_x or single_y:
       if single_x:
         top_enc_x, top_enc_y = LICONContact.li_enc
       else:
