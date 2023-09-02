@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>LVS</description>
+ <version/>
+ <category>lvs</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name>sky130a</group-name>
+ <menu-path>tools_menu.sky130a&gt;lvs("Sky130A").end</menu-path>
+ <interpreter>dsl</interpreter>
+ <dsl-interpreter-name>lvs-dsl-xml</dsl-interpreter-name>
+ <text>
+# Take input from layout window
+$input = nil
+
+# threads
+$thr = 1
+
+# interactive report
+$report = ""
+
+cv = RBA::CellView::active
+$schematic = File.join(File.dirname(cv.filename), cv.cell_name + ".spice")
+
+# %include ../lvs_core/sky130.lvs
+</text>
+</klayout-macro>

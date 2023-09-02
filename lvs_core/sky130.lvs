@@ -38,8 +38,6 @@ logger.info("Starting running SKY130 Klayout LVS runset on %s" % [$input])
 if $input
   source($input)
   logger.info("Layout file: #{$input}")
-else
-  logger.error("No layout loaded, please add your layout file")
 end
 
 #=== GET THREADS ===
@@ -52,7 +50,9 @@ else
 end
 
 #=== GET REPORT ===
-if $report
+if $report == ""
+  report_lvs
+elsif $report
   report_lvs($report)
   logger.info("Final report: #{$report}")
 else
@@ -199,10 +199,35 @@ class SubcircuitModelsReader < RBA::NetlistSpiceReaderDelegate
     end
   end
 
+  def wants_subcircuit(circuit_name)
+    puts "@@@ wants_subcircuit " + circuit_name
+    ret = circuit_name.start_with?(/sky130_fd_pr__[np]fet/i)
+    puts "@@@ -> " + ret.to_s
+    return ret
+  end
+
   # take and translate the element
   def element(circuit, el, name, model, value, nets, params)
 
-    if el == "C" && model.include?('SKY130') && model.include?('VPP')
+    if el == "X" 
+
+      if nets.size == 4
+        cls = RBA::DeviceClassMOS4Transistor::new
+        cls.name = model
+        circuit.netlist.add(cls)
+
+        # create a device
+        device = circuit.create_device(cls, name)
+        device.set_parameter("W", params["W"])
+        device.set_parameter("L", params["L"])
+
+        # and configure the device
+        [ "S", "G", "D", "B" ].each_with_index do |t,index|
+          device.connect_terminal(t, nets[index])
+        end
+      end
+
+    elsif el == "C" && model.include?('SKY130') && model.include?('VPP')
 
       if nets.size == 4
         cls = RBA::DeviceClassMOS4Transistor::new
@@ -274,6 +299,13 @@ else
     puts "No schematic loaded , please add your netlist file"
     logger.error("No schematic loaded , please add your netlist file")
   end 
+end
+
+# If the schematic is without .subckt, identify the synthetic top level
+# circuit with the current layout's circuit
+layout_top = source.layout.top_cell.name
+if !schematic.circuit_by_name(layout_top) && schematic.circuit_by_name(".TOP")
+  same_circuits(layout_top, ".TOP")
 end
 
 class BResistor < RBA::DeviceClassResistorWithBulk
