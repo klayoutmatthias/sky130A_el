@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <technology>
  <name>sky130A</name>
- <description>sky130A-metals</description>
+ <description>sky130A</description>
  <group/>
  <dbu>0.001</dbu>
  <base-path/>
@@ -159,9 +159,43 @@
    <name/>
    <description/>
    <connection>MET4,VIA4,MET5</connection>
-   <symbols>MET5='72/20'</symbols>
+   <connection>MET3,VIA3,MET4</connection>
+   <connection>MET2,VIA2,MET3</connection>
+   <connection>MET1,VIA1,MET2</connection>
+   <connection>LI,MCON,MET1</connection>
+   <connection>POLY,LICON,LI</connection>
+   <symbols>POLY='66/20'</symbols>
+   <symbols>LICON='66/44'</symbols>
+   <symbols>LI='67/20'</symbols>
+   <symbols>MCON='67/44'</symbols>
+   <symbols>MET1='68/20'</symbols>
+   <symbols>VIA1='68/44'</symbols>
+   <symbols>MET2='69/20'</symbols>
+   <symbols>VIA2='69/44'</symbols>
+   <symbols>MET3='70/20'</symbols>
+   <symbols>VIA3='70/44'</symbols>
+   <symbols>MET4='71/20'</symbols>
+   <symbols>VIA4='71/44'</symbols>
+   <symbols>META5='72/20'</symbols>
   </stack>
   <connection>MET4,VIA4,MET5</connection>
-  <symbols>MET5='72/20'</symbols>
+  <connection>MET3,VIA3,MET4</connection>
+  <connection>MET2,VIA2,MET3</connection>
+  <connection>MET1,VIA1,MET2</connection>
+  <connection>LI,MCON,MET1</connection>
+  <connection>POLY,LICON,LI</connection>
+  <symbols>POLY='66/20'</symbols>
+  <symbols>LICON='66/44'</symbols>
+  <symbols>LI='67/20'</symbols>
+  <symbols>MCON='67/44'</symbols>
+  <symbols>MET1='68/20'</symbols>
+  <symbols>VIA1='68/44'</symbols>
+  <symbols>MET2='69/20'</symbols>
+  <symbols>VIA2='69/44'</symbols>
+  <symbols>MET3='70/20'</symbols>
+  <symbols>VIA3='70/44'</symbols>
+  <symbols>MET4='71/20'</symbols>
+  <symbols>VIA4='71/44'</symbols>
+  <symbols>META5='72/20'</symbols>
  </connectivity>
 </technology>
