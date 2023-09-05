@@ -34,6 +34,6 @@ $floating_met = "false"
 # Default threads
 $thr = nil
 
-# %include ../drc_core/sky130A_mr.drc
+# %include ./core/sky130A_mr.drc
 </text>
 </klayout-macro>

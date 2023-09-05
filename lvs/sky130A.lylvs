@@ -28,6 +28,6 @@ $report = ""
 cv = RBA::CellView::active
 $schematic = File.join(File.dirname(cv.filename), cv.cell_name + ".spice")
 
-# %include ../lvs_core/sky130.lvs
+# %include ./core/sky130.lvs
 </text>
 </klayout-macro>

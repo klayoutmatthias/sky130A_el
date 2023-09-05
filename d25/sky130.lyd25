@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description/>
+ <description>D25 view</description>
  <version/>
  <category>d25</category>
  <prolog/>
@@ -11,8 +11,8 @@
  <priority>0</priority>
  <shortcut/>
  <show-in-menu>true</show-in-menu>
- <group-name>d25_scripts</group-name>
- <menu-path>tools_menu.d25.end</menu-path>
+ <group-name>sky130a</group-name>
+ <menu-path>tools_menu.sky130a&gt;lvs("Sky130A").end</menu-path>
  <interpreter>dsl</interpreter>
  <dsl-interpreter-name>d25-dsl-xml</dsl-interpreter-name>
  <text>poly = input(66, 20)

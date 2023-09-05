@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <technology>
- <name>sky130A</name>
- <description>sky130A</description>
+ <name>sky130A_el</name>
+ <description>sky130A Elements</description>
  <group/>
  <dbu>0.001</dbu>
  <base-path/>
- <original-base-path>/home/matthias/.klayout/tech/sky130A</original-base-path>
  <layer-properties_file>sky130A.lyp</layer-properties_file>
  <add-other-layers>true</add-other-layers>
  <reader-options>

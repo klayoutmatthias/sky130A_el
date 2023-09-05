@@ -128,7 +128,8 @@ def make_mosfet(model: str,
                 min_poly_space: float=0.0,
                 d_cont: int=1, s_cont: int=1, 
                 g_wire: int=0, d_wire: int=0, s_wire: int=0,
-                g_wire_width: float=0.0, d_wire_width: float=0.0, s_wire_width: float=0.0,
+                g_wire_width: float=0.0, 
+                d_wire_width: float=0.0, s_wire_width: float=0.0,
                 poly_ext_top: float=0.0, poly_ext_bottom: float=0.0,
                 d_li_ext_top: float=0.0, d_li_ext_bottom: float=0.0,
                 s_li_ext_top: float=0.0, s_li_ext_bottom: float=0.0,
@@ -136,24 +137,44 @@ def make_mosfet(model: str,
                 s_met1_ext_top: float=0.0, s_met1_ext_bottom: float=0.0
                 ):
 
-  g_wire_width    = max(g_wire_width, Rules.poly_width)
-  s_wire_width    = max(s_wire_width, Rules.li_width)
-  d_wire_width    = max(d_wire_width, Rules.li_width)
-  
-  poly_ext_top    = max(poly_ext_top,    Rules.poly_endcap if (g_wire & 2) == 0 else Rules.poly_diff_sep)
-  poly_ext_bottom = max(poly_ext_bottom, Rules.poly_endcap if (g_wire & 1) == 0 else Rules.poly_diff_sep)
+  g_wire_width      = max(g_wire_width, Rules.poly_width)
 
-  d1              = max(d_li_ext_top,    0.0 if (d_wire & 2) == 0 else Rules.li_spacing + max(0.0, s_li_ext_top))
-  d2              = max(d_li_ext_bottom, 0.0 if (d_wire & 1) == 0 else Rules.li_spacing + max(0.0, s_li_ext_bottom))
+  if s_cont == 1:
+    s_wire_width    = max(s_wire_width, Rules.li_width)
+  if s_cont == 2:
+    s_wire_width    = max(s_wire_width, Rules.met1_width)
+
+  if d_cont == 1:
+    d_wire_width    = max(d_wire_width, Rules.li_width)
+  if d_cont == 2:
+    d_wire_width    = max(d_wire_width, Rules.met1_width)
   
-  s1              = max(s_li_ext_top,    0.0 if (s_wire & 2) == 0 else Rules.li_spacing + max(0.0, d_li_ext_top))
-  s2              = max(s_li_ext_bottom, 0.0 if (s_wire & 1) == 0 else Rules.li_spacing + max(0.0, d_li_ext_bottom))
+  poly_ext_top      = max(poly_ext_top,    Rules.poly_endcap if (g_wire & 2) == 0 else Rules.poly_diff_sep)
+  poly_ext_bottom   = max(poly_ext_bottom, Rules.poly_endcap if (g_wire & 1) == 0 else Rules.poly_diff_sep)
+
+  d1                = max(d_li_ext_top,    0.0 if (d_wire & 2) == 0 else Rules.li_spacing + max(0.0, s_li_ext_top))
+  d2                = max(d_li_ext_bottom, 0.0 if (d_wire & 1) == 0 else Rules.li_spacing + max(0.0, s_li_ext_bottom))
   
-  d_li_ext_top    = d1
-  d_li_ext_bottom = d2
+  s1                = max(s_li_ext_top,    0.0 if (s_wire & 2) == 0 else Rules.li_spacing + max(0.0, d_li_ext_top))
+  s2                = max(s_li_ext_bottom, 0.0 if (s_wire & 1) == 0 else Rules.li_spacing + max(0.0, d_li_ext_bottom))
   
-  s_li_ext_top    = s1
-  s_li_ext_bottom = s2
+  d_li_ext_top      = d1
+  d_li_ext_bottom   = d2
+  
+  s_li_ext_top      = s1
+  s_li_ext_bottom   = s2
+  
+  d1                = max(d_met1_ext_top,    0.0 if (d_wire & 2) == 0 else Rules.met1_spacing + max(0.0, s_met1_ext_top))
+  d2                = max(d_met1_ext_bottom, 0.0 if (d_wire & 1) == 0 else Rules.met1_spacing + max(0.0, s_met1_ext_bottom))
+  
+  s1                = max(s_met1_ext_top,    0.0 if (s_wire & 2) == 0 else Rules.met1_spacing + max(0.0, d_met1_ext_top))
+  s2                = max(s_met1_ext_bottom, 0.0 if (s_wire & 1) == 0 else Rules.met1_spacing + max(0.0, d_met1_ext_bottom))
+  
+  d_met1_ext_top    = d1
+  d_met1_ext_bottom = d2
+  
+  s_met1_ext_top    = s1
+  s_met1_ext_bottom = s2
   
   chain = []
   for i in range(0, nf):
@@ -172,6 +193,8 @@ def make_mosfet(model: str,
     param.poly_ext_bottom = poly_ext_bottom
     param.l_li_ext_top, param.r_li_ext_top = swapped_if(s_li_ext_top, d_li_ext_top, (i % 2) != 0)
     param.l_li_ext_bottom, param.r_li_ext_bottom = swapped_if(s_li_ext_bottom, d_li_ext_bottom, (i % 2) != 0)
+    param.l_met1_ext_top, param.r_met1_ext_top = swapped_if(s_met1_ext_top, d_met1_ext_top, (i % 2) != 0)
+    param.l_met1_ext_bottom, param.r_met1_ext_bottom = swapped_if(s_met1_ext_bottom, d_met1_ext_bottom, (i % 2) != 0)
     
     chain.append(make_single_mosfet(param, i % 2 != 0))
 
@@ -190,17 +213,33 @@ def make_mosfet(model: str,
   if (g_wire & 1) != 0:  # bottom
     comp.append(Rect(enclose=device, enclose_feature="poly", layer=Layers.poly, enl_b = g_wire_width, enl_t = None))
 
-  # Add drain wiring
-  if (d_wire & 2) != 0:  # top
-    comp.append(Rect(enclose=device, enclose_feature="li_drain", layer=Layers.li, enl_b = None, enl_t = d_wire_width))
-  if (d_wire & 1) != 0:  # bottom
-    comp.append(Rect(enclose=device, enclose_feature="li_drain", layer=Layers.li, enl_b = d_wire_width, enl_t = None))
+  # Add drain wiring in LI
+  if d_cont == 1:
+    if (d_wire & 2) != 0:  # top
+      comp.append(Rect(enclose=device, enclose_feature="li_drain", layer=Layers.li, enl_b = None, enl_t = d_wire_width))
+    if (d_wire & 1) != 0:  # bottom
+      comp.append(Rect(enclose=device, enclose_feature="li_drain", layer=Layers.li, enl_b = d_wire_width, enl_t = None))
 
-  # Add source wiring
-  if (s_wire & 2) != 0:  # top
-    comp.append(Rect(enclose=device, enclose_feature="li_source", layer=Layers.li, enl_b = None, enl_t = s_wire_width))
-  if (s_wire & 1) != 0:  # bottom
-    comp.append(Rect(enclose=device, enclose_feature="li_source", layer=Layers.li, enl_b = s_wire_width, enl_t = None))
+  # Add drain wiring in MET1
+  if d_cont == 2:
+    if (d_wire & 2) != 0:  # top
+      comp.append(Rect(enclose=device, enclose_feature="met1_drain", layer=Layers.met1, enl_b = None, enl_t = d_wire_width))
+    if (d_wire & 1) != 0:  # bottom
+      comp.append(Rect(enclose=device, enclose_feature="met1_drain", layer=Layers.met1, enl_b = d_wire_width, enl_t = None))
+
+  # Add source wiring in LI
+  if s_cont == 1:
+    if (s_wire & 2) != 0:  # top
+      comp.append(Rect(enclose=device, enclose_feature="li_source", layer=Layers.li, enl_b = None, enl_t = s_wire_width))
+    if (s_wire & 1) != 0:  # bottom
+      comp.append(Rect(enclose=device, enclose_feature="li_source", layer=Layers.li, enl_b = s_wire_width, enl_t = None))
+
+  # Add source wiring in MET1
+  if s_cont == 2:
+    if (s_wire & 2) != 0:  # top
+      comp.append(Rect(enclose=device, enclose_feature="met1_source", layer=Layers.met1, enl_b = None, enl_t = s_wire_width))
+    if (s_wire & 1) != 0:  # bottom
+      comp.append(Rect(enclose=device, enclose_feature="met1_source", layer=Layers.met1, enl_b = s_wire_width, enl_t = None))
 
   # Add the PR boundary rect and align  
   comp.append(Rect(enclose=device, enclose_pack=True, layer=Layers.pr_bnd))
