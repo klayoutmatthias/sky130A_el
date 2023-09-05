@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<salt-grain>
+ <name>sky130A_el</name>
+ <token/>
+ <hidden>false</hidden>
+ <version>0.0</version>
+ <api-version/>
+ <title>sky130A Elements</title>
+ <doc>Provides some basic PCells, DRC, LVS, XSection and D25 setup for sky130A technology.</doc>
+ <url>https://github.com/klayoutmatthias/sky130A_el/trunk</url>
+ <license>Various (see file headers)</license>
+ <author>Matthias Köfferlein</author>
+ <author-contact>matthias@klayout.de</author-contact>
+ <authored-time/>
+ <screenshot/>
+</salt-grain>
