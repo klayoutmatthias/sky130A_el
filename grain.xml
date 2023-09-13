@@ -7,7 +7,7 @@
  <api-version/>
  <title>sky130A Elements</title>
  <doc>Provides some basic PCells, DRC, LVS, XSection and D25 setup for sky130A technology.</doc>
- <url>https://github.com/klayoutmatthias/sky130A_el/trunk</url>
+ <doc-url>https://klayoutmatthias.github.io/sky130A_el</doc-url>
  <license>Various (see file headers)</license>
  <author>Matthias Köfferlein</author>
  <author-contact>matthias@klayout.de</author-contact>
