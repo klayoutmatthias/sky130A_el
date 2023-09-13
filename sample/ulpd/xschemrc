@@ -1,0 +1,18 @@
+
+set toolbar_visible 1
+set tabbed_interface 1
+set zoom_full_center 1
+
+set XSCHEM_LIBRARY_PATH {}
+append XSCHEM_LIBRARY_PATH ${XSCHEM_SHAREDIR}/xschem_library
+
+set PDK_ROOT /home/matthias/pdk
+set PDK sky130A
+
+set SKYWATER_MODELS ${PDK_ROOT}/${PDK}/libs.tech/ngspice
+set SKYWATER_STDCELLS ${PDK_ROOT}/${PDK}/libs.ref/sky130_fd_sc_hd/spice
+
+append XSCHEM_LIBRARY_PATH :${PDK_ROOT}/xschem_sky130
+
+puts ${XSCHEM_LIBRARY_PATH}
+

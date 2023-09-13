@@ -1,0 +1,31 @@
+
+
+* NOTE: needs 
+* /home/matthias/pdk/sky130A/libs.tech/ngspice/spinit
+* in ~/.spiceinit
+
+.param mc_mm_switch=0
+
+.lib /home/matthias/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+.include upld.cir
+
+VSUPPLY vcc 0 dc=1.8
+
+VOUT vn 0 dc=0.5
+VIN vin 0 pulse(0.0 1.0 10n 1n 1n 50n)
+
+.param wn=15
+.param wp=25
+
+RLOAD vin vdio 100k
+XDIODE vcc 0 vdio vn UPLD
+
+RLOAD2 vin vdio2 100k
+XNFETDIODE vn vdio2 vdio2 vn sky130_fd_pr__nfet_01v8_lvt l=0.5 w=3
+
+.control
+tran 0.1n 100n
+plot V(vin)-0.5 (V(vdio)-V(vn)) (V(vdio2)-V(vn))
+.endc
+.end

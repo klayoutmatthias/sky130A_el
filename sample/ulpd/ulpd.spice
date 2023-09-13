@@ -1,0 +1,14 @@
+** sch_path: /home/matthias/versuche/ulpd/ulpd.sch
+**.subckt ulpd vn vp
+*.iopin vn
+*.iopin vp
+XM2 net1 vp vn GND sky130_fd_pr__nfet_01v8_lvt L=0.5 W=15 nf=10 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W'
++ sa=0 sb=0 sd=0 mult=1 m=1
+XM1 net1 vn vp VDD sky130_fd_pr__pfet_01v8_lvt L=0.5 W=20 nf=10 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W'
++ sa=0 sb=0 sd=0 mult=1 m=1
+**.ends
+.GLOBAL VDD
+.GLOBAL GND
+.end

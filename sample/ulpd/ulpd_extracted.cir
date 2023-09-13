@@ -1,0 +1,8 @@
+* Extracted by KLayout with SKY130 LVS runset on : 05/09/2023 23:11
+
+.SUBCKT ulpd VN VDD VP sky130_gnd
+M$1 VP VN \$11 VDD sky130_fd_pr__pfet_01v8_lvt L=0.5 W=20 AS=2.99 AD=2.99
++ PS=24.99 PD=24.99
+M$11 VN VP \$11 sky130_gnd sky130_fd_pr__nfet_01v8_lvt L=0.5 W=15 AS=2.2425
++ AD=2.2425 PS=19.49 PD=19.49
+.ENDS ulpd

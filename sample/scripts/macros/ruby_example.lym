@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category/>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>ruby</interpreter>
+ <dsl-interpreter-name/>
+ <text>
+class MyClass
+  attr_accessor :a
+  def initialize
+    @a = 17
+  end
+  def print_me
+    puts "The answer is #{a}"
+  end
+end
+
+obj = MyClass::new
+obj.a = 42
+obj.print_me
+
+</text>
+</klayout-macro>

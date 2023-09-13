@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category>drc</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name>drc_scripts</group-name>
+ <menu-path>tools_menu.drc.end</menu-path>
+ <interpreter>dsl</interpreter>
+ <dsl-interpreter-name>drc-dsl-xml</dsl-interpreter-name>
+ <text>
+# deep (hierarchical mode)
+deep  
+
+# log process
+verbose
+
+
+geo = input(65, 20)   # diff.drawing on Sky130
+
+wmax = 1.um
+wmin = 0
+
+while (wmax - wmin) &gt;= 1.5.dbu
+
+  puts "Iteration with w=#{'%.12g'%wmin}..#{'%.12g'%wmax}"
+
+  wmid = (0.5 * (wmax + wmin) / 1.dbu).floor * 1.dbu
+  
+  nothing_smaller = geo.width(wmid).is_empty?
+  
+  if nothing_smaller
+    puts "  Nothing is smaller than #{'%.12g'%wmid}"
+  end
+  
+  if nothing_smaller
+    wmin = wmid
+  else
+    wmax = wmid
+  end
+  
+end
+
+puts "Min width is #{'%.12g'%wmin}"
+  
+</text>
+</klayout-macro>
