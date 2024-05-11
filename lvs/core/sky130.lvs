@@ -18,6 +18,7 @@
 #===========================================================================================================================
 
 require 'time'
+require 'etc'
 require "logger"
 
 exec_start_time = Time.now
@@ -25,7 +26,11 @@ exec_start_time = Time.now
 logger = Logger.new(STDOUT)
 
 logger.formatter = proc do |severity, datetime, progname, msg|
-  "#{datetime}: Memory Usage (" + `pmap #{Process.pid} | tail -1`[10,40].strip + ") : #{msg}\n"
+  if Etc.uname[:sysname] == "Linux" 
+    "#{datetime}: Memory Usage (" + `pmap #{Process.pid} | tail -1`[10,40].strip + ") : #{msg}\n"
+  else
+    "#{datetime}: #{msg}\n"
+  end
 end
 
 #================================================
@@ -200,9 +205,7 @@ class SubcircuitModelsReader < RBA::NetlistSpiceReaderDelegate
   end
 
   def wants_subcircuit(circuit_name)
-    puts "@@@ wants_subcircuit " + circuit_name
     ret = circuit_name.start_with?(/sky130_fd_pr__[np]fet/i)
-    puts "@@@ -> " + ret.to_s
     return ret
   end
 
@@ -2508,7 +2511,7 @@ max_res(1e9)
 min_caps(1e-16)
 
 #=== COMPARE ===
-compare
+result = compare
 
 #=== TIME ESTIMATE ===
 exec_end_time = Time.now
@@ -2516,7 +2519,7 @@ run_time = exec_end_time - exec_start_time
 logger.info("LVS Total Run time %f seconds" % [run_time])
 
 #=== DECISION ===
-if ! compare
+if ! result
   logger.info("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
   logger.error("ERROR : Netlists don't match")
   logger.info("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
