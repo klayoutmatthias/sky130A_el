@@ -25,6 +25,9 @@ $thr = 1
 # interactive report
 $report = ""
 
+# deep mode
+$run_mode = "deep"
+
 cv = RBA::CellView::active
 $schematic = File.join(File.dirname(cv.filename), cv.cell_name + ".spice")
 

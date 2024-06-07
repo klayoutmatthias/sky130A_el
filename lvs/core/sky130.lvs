@@ -1663,7 +1663,6 @@ logger.info("Starting SKY130 LVS connectivity setup")
 logger.info("Starting SKY130 LVS connectivity setup (Inter-layer)")
 
 # Inter-layer
-connect(sub         ,     ptap_conn)
 connect(dnwell      ,     ntap_conn)
 connect(nwell       ,     ntap_conn)
 connect(ptap_conn   ,         licon)
@@ -1686,7 +1685,6 @@ connect(via4        ,      met5_con)
 logger.info("Starting SKY130 LVS connectivity setup (Attaching labels)")
 
 # Attaching labels
-connect(sub         ,      sub_label)
 connect(nwell       ,    nwell_label)
 connect(tap         ,      tap_label)
 connect(nsd        ,      diff_label)
@@ -1704,7 +1702,9 @@ connect(pad         ,      pad_label)
 logger.info("Starting SKY130 LVS connectivity setup (Global connections)")
 
 # Global
-connect_global(sub  , substrate_name)
+connect_global(sub_label  , substrate_name)
+connect_global(sub        , substrate_name)
+connect_global(ptap_conn  , substrate_name)
 
 logger.info("Starting SKY130 LVS connectivity setup (Multifinger Devices)")
 
