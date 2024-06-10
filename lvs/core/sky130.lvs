@@ -1662,6 +1662,13 @@ logger.info("Starting SKY130 LVS connectivity setup")
 
 logger.info("Starting SKY130 LVS connectivity setup (Inter-layer)")
 
+# export layer names
+if self.respond_to?(:name)
+  %w(dnwell li_con licon mcon met1_con met2_con met3_ncap met4_ncap met5_con nsd ntap_conn nwell poly_con psd ptap_conn via1 via2 via3 via4).each do |l|
+    name(eval(l), l)
+  end
+end
+
 # Inter-layer
 connect(dnwell      ,     ntap_conn)
 connect(nwell       ,     ntap_conn)
